@@ -1,0 +1,96 @@
+﻿@page "/elements"
+@using BlazorApp1.Data;
+@inject IElementService Service;
+@inject NavigationManager NM;
+
+<h3>Studenci</h3>
+
+@if(_elements is null)
+{
+    <div>Loading... </div>
+} else
+{
+    <table>
+        <thead>
+            <tr>
+                <th @onclick=@(()=> Sort("Avatar"))>Avatar</th>
+                <th @onclick=@(()=> Sort("FirstName"))>First Name</th>
+                <th @onclick=@(()=> Sort("LastName"))>Last Name</th>
+                <th @onclick=@(()=> Sort("Birthdate"))>Birthdate</th>
+                <th @onclick=@(()=> Sort("Studies"))>Studies</th>
+                <th>Action </th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in _elements)
+            {
+                <tr>
+                    <td><img src=@item.AvatarURL alt="Zdjecie" /></td>
+                    <td>@item.FirstName</td>
+                    <td>@item.LastName</td>
+                    <td>@item.Birthdate</td>
+                    <td>@item.Studies</td>
+                    <td><button @onclick=@(() => NavigateTo($"/elements/{item.ID}"))>Show Details</button>
+                        <button @onclick=@(() => RemoveElement(item.ID))>Remove</button>
+                        </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    
+}
+
+@code {
+    private List<Element>? _elements;
+    private Tuple<String, SortDirection?> _currentSort;
+
+    enum SortDirection
+    {
+        DESC,
+        ASC
+    }
+
+    private void NavigateTo(string url)
+    {
+        NM.NavigateTo(url);
+    }
+
+    private async Task RemoveElement(int id)
+    {
+        //usunac elemtn z bazy danych
+        var elementToRemove = _elements.FirstOrDefault(e => e.ID == id);
+        if(elementToRemove is not null)
+        {
+            _elements.Remove(elementToRemove);
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        _elements = Service.GetElements();
+        _currentSort = new Tuple<string, SortDirection?>("", null);
+    }
+
+    private void Sort(string columnName)
+    {
+        if(_currentSort.Item1 == columnName)
+        {
+            _currentSort = new Tuple<string, SortDirection?>(columnName, _currentSort.Item2 == SortDirection.ASC ? SortDirection.DESC : SortDirection.ASC);
+        } 
+        else
+        {
+            _currentSort = new Tuple<string, SortDirection?>(columnName, SortDirection.DESC);  
+        }
+
+        switch (_currentSort.Item2)
+        {
+            case SortDirection.DESC:
+                _elements = _elements!.OrderByDescending(e => e.GetType().GetProperty(columnName)?.GetValue(e)).ToList();
+                break;
+            case SortDirection.ASC:
+                _elements = _elements!.OrderBy(e => e.GetType().GetProperty(columnName)?.GetValue(e)).ToList();
+                break;
+        }
+        
+    }
+}

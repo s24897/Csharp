@@ -1,0 +1,47 @@
+﻿@page "/elements/{ID:int}"
+@using BlazorApp1.Data;
+@inject IElementService Service;
+<h3>Student's Details</h3>
+@if(_element is not null)
+{
+    <div class="row">
+        <div class="col">
+            <span>FirstName: </span>
+            <span>@_element.FirstName</span>
+
+            <div class="mt-3">
+                <span>LastName: </span>
+                <span>@_element.LastName</span>
+            </div>
+
+            <div class="mt-3">
+                <span>Birtdate: </span>
+                <span>@_element.Birthdate</span>
+            </div>
+
+            <div class="mt-3">
+                <span>Studies: </span>
+                <span>@_element.Studies</span>
+            </div>
+        </div>
+        <div class="col">
+            <span>Avatar</span>
+            @*<InputText @bind-value="avatar"/>*@
+            <br />
+            <img src=@_element.AvatarURL alt="image preview" />
+        </div>
+    </div>
+}
+
+<a href="/elements">return</a>
+
+@code {
+    [Parameter]
+    public int ID { get; set;  }
+    private Element? _element;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _element = Service.GetElementById(ID);
+    }
+}

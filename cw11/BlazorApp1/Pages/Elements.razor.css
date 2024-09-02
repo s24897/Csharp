@@ -1,0 +1,15 @@
+﻿table{
+    width: 100%;
+}
+table,th,td{
+    border: 1px solid gray;
+}
+
+th,td {
+    text-align:center;
+    padding: 5px;
+}
+
+img{
+    width: 100px;
+}
